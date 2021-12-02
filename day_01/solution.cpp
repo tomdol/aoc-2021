@@ -37,19 +37,19 @@ uint32_t window_solution(const std::filesystem::path& input_file) {
     auto first = std::istream_iterator<int32_t>(depth_measurements);
     const auto last = std::istream_iterator<int32_t>();
 
-    uint32_t i = 0;
     std::array<int32_t, 4> values{*first++, *first++, *first++, 0};
-    while(first != last) {
-        values[3] = *first++;
+    const auto predicate = [&values](auto d) {
+        values[3] = d;
         // 2 middle elements cancel each other out when subtracting 2 windows
         // which means only edge elements from 2 windows have to be subtracted
-        if (values[3] - values[0] > 0)
-            ++i;
+        const bool increased = values[3] - values[0] > 0;
         // shift the 3 last values left and make the last element a placeholder for the next iteration
         std::rotate(std::begin(values), std::begin(values) + 1, std::end(values));
-    }
 
-    return i;
+        return increased;
+    };
+
+    return std::count_if(first, last, predicate);
 }
 
 int main() {
